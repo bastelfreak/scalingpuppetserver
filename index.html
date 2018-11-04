@@ -337,11 +337,92 @@ class: center, middle, inverse
 
 ```yaml
 ---
-puppet::server_max_active_instances: \
-%{facts.processors.count}
+puppet::server_max_active_instances: %{facts.processors.count}
 ```
 ]
+
+???
+
+If there is nothing on a server except for puppetserver, we can give it as many jruby instances as cores
+
 ---
+
+.left-column[
+## Improvements
+### Puppetserver
+]
+
+.right-column[
+* Puppetserver can cache code by loading it from disk to ram
+
+* \+ minimal decreased compilation time for each catalog
+
+* \- You should clean the cache after each deploy
+
+```yaml
+---
+puppet::server_environment_class_cache_enabled: true
+```
+
+* cleaning the cache:
+```sh
+curl -i --cert $(puppet config print hostcert) \
+--key $(puppet config print hostprivkey) \
+--cacert $(puppet config print cacert) \
+-X DELETE \
+https://$(puppet config print server):8140/puppet-admin-api/v1/environment-cache?environment=production
+```
+]
+
+???
+
+It can be purged globally or per env. Cache can be configured for each env
+
+---
+
+
+.left-column[
+## Improvements
+### Puppetserver
+]
+
+.right-column[
+
+* theforeman/puppet creates the `development` and `production` environment
+
+* r10k purges unknown environments
+
+* theforeman/puppet restarts puppetserver if it creates and environment
+
+* I have no git branches named `development` nor `production` in my control repo...
+
+* Each environment deploy lead to a restarted puppetserver for weeks
+
+```yaml
+---
+# dont create development/production env
+puppet::server_environments: []
+# dont create /etc/puppetlabs/code/environments/common
+puppet::server_common_modules_path: ''
+```
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .left-column[
 ## Puppet
