@@ -325,7 +325,7 @@ class: center, middle, inverse
 
 * They are ordered the way we did them, not the optimal way
 
-* people should probably start with metrics...
+* People should probably start with metrics...
 
 ---
 
@@ -335,13 +335,13 @@ class: center, middle, inverse
 ]
 
 .right-column[
-* uses jruby within a JVM
+* Uses jruby within a JVM
 
-* one jruby instance compiles one catalog at a time
+* One jruby instance compiles one catalog at a time
 
 * More instances => more catalogs per minute
 
-* use [theforeman/puppet](https://forge.puppet.com/theforeman/puppet) to configure puppeterver
+* Use [theforeman/puppet](https://forge.puppet.com/theforeman/puppet) to configure puppeterver
 
 ```yaml
 ---
@@ -363,7 +363,7 @@ If there is nothing on a server except for puppetserver, we can give it as many 
 .right-column[
 * Puppetserver can cache code by loading it from disk to ram
 
-* \+ minimal decreased compilation time for each catalog
+* \+ Minimal decreased compilation time for each catalog
 
 * \- You should clean the cache after each deploy
 
@@ -396,11 +396,11 @@ It can be purged globally or per env. Cache can be configured for each env
 
 .right-column[
 
-* theforeman/puppet creates the `development` and `production` environment
+* [theforeman/puppet](https://forge.puppet.com/theforeman/puppet) creates the `development` and `production` environment
 
 * r10k purges unknown environments
 
-* theforeman/puppet restarts puppetserver if it creates and environment
+* [theforeman/puppet](https://forge.puppet.com/theforeman/puppet) restarts puppetserver if it creates and environment
 
 * I have no git branches named `development` nor `production` in my control repo...
 
@@ -430,7 +430,7 @@ puppet::server_common_modules_path: ''
 
 * Puppet Inc docs suggest that minimal=maximal memory
 
-  * that is based on Java 6 docs, so probably outdated
+  * That is based on Java 6 docs, so probably outdated
 
 * Required memory per instance depends entirely on the codebase (modules)
 
@@ -479,13 +479,13 @@ include foreman::plugin::memcache
 ]
 ???
 
-* foreman still feels slow
+* Foreman still feels slow
 
 * memcached is a memory object caching system
 
-* helps caching $things for foreman
+* Helps caching $things for foreman
 
-* is required if you ever run a distributed foreman
+* Is required if you ever run a distributed foreman
 ---
 
 .left-column[
@@ -521,7 +521,7 @@ after this we see database issues in the foreman logfile
 
 .right-column[
 
-* we use [theforeman/foreman](https://forge.puppet.com/theforeman/foreman) to manage foreman
+* We use [theforeman/foreman](https://forge.puppet.com/theforeman/foreman) to manage foreman
 
 * Tuned puppetserver results in more requests to foreman
 
@@ -564,7 +564,7 @@ foreman::keepalive_timeout: 180
 
 * Don't use harddrive, SATA/SAS SSDs and NVMe SSDs are the way to go
 
-* execute pgtune
+* Execute pgtune
 
 ```sh
 pgtune -i /var/lib/pgsql/10/data/postgresql.conf -o postgresql5.conf
@@ -690,7 +690,7 @@ We don't want a loadbalancer as that would be a single point of failure
 
   * Increase default threadcount from 1 to $more...
 
-* bind puppetserver to localhost with http
+* Bind puppetserver to localhost with http
 
   * And don't require TLS client certificates
 
