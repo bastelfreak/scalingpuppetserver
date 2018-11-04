@@ -513,7 +513,6 @@ after this we see database issues in the foreman logfile
 
 ---
 
-
 .left-column[
 ## Improvements
 ### Puppetserver
@@ -545,6 +544,62 @@ foreman::keepalive_timeout: 180
 * We just killed our database with too many connections
 
 ---
+
+.left-column[
+## Improvements
+### Puppetserver
+### Foreman
+### PostgreSQL
+]
+
+.right-column[
+
+* This deserves a dedicated conference (there actually is)
+
+* Attend the [PostgresConf](https://postgresconf.org/conferences/) or the PostgreSQL DevRoom at [FOSDEM](https://fosdem.org/2019/)
+
+* Ask people in #postgresql on freenode
+
+* Use at least postgres 10 and rely on the upstream repos if possible
+
+* Don't use harddrive, SATA/SAS SSDs and NVMe SSDs are the way to go
+
+* execute pgtune
+
+```sh
+pgtune -i /var/lib/pgsql/10/data/postgresql.conf -o postgresql5.conf
+```
+
+```puppet
+postgresql::server::config_entry{'max_connections':
+  value => 400,
+}
+```
+]
+
+???
+
+* databases are so compley
+* Upstream postgres supports Debian and RHEL/IBM based operatingsystems
+* postgres10 supports parallel/multithreaded queries
+* puppetdb doesn't support postgres10 yet, but it works. support comes with the next minor release
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
