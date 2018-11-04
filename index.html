@@ -349,6 +349,8 @@ puppet::server_max_active_instances: %{facts.processors.count}
 ```
 ]
 
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
 ???
 
 If there is nothing on a server except for puppetserver, we can give it as many jruby instances as cores
@@ -383,6 +385,8 @@ https://$(puppet config print server):8140/puppet-admin-api/v1/environment-cache
 ```
 ]
 
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
 ???
 
 It can be purged globally or per env. Cache can be configured for each env
@@ -414,6 +418,8 @@ puppet::server_environments: []
 puppet::server_common_modules_path: ''
 ```
 ]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
 
 ---
 
@@ -447,6 +453,8 @@ class{'puppet':
 ```
 ]
 
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
 ???
 
 higher minimal heap size => higher startupt time
@@ -477,6 +485,9 @@ include memcached
 include foreman::plugin::memcache
 ```
 ]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
 ???
 
 * Foreman still feels slow
@@ -507,6 +518,8 @@ apache::mod::passenger::passenger_min_instances: %{facts.processors.count}
 ```
 ]
 
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
 ???
 
 after this we see database issues in the foreman logfile
@@ -534,6 +547,8 @@ foreman::max_keepalive_requests: 1000
 foreman::keepalive_timeout: 180
 ```
 ]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
 
 ???
 
@@ -577,6 +592,8 @@ postgresql::server::config_entry{'max_connections':
 ```
 ]
 
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
 ???
 
 * databases are so compley
@@ -616,6 +633,8 @@ puppetdb::server::concurrent_writes: 8
 puppetdb::server::automatic_dlo_cleanup: true
 ```
 ]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
 
 ???
 
@@ -696,7 +715,6 @@ We don't want a loadbalancer as that would be a single point of failure
 
 * Setup consul for dynamic loadbalancing across all puppetservers
 
-
 ]
 
 .footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
@@ -706,8 +724,29 @@ We don't want a loadbalancer as that would be a single point of failure
 * consul provides DNS loadbalancing
 * We can provide a health script to check if puppetserver still works, otherwise consul disables the node
 
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
 
+---
 
+.left-column[
+## Summary
+]
+
+.right-column[
+
+Scaling a Puppetserver stack
+
+* It's a complex distributed system with many tunables and pitfalls
+
+* Start with proper monitoring instead of guessing
+
+* Best practice [controlrepo](https://github.com/bastelfreak/puppetcontrolrepo#puppet-all-in-one-stack-on-centos-7) with all tuneables, explanations, unit/acceptance tests
+
+* Contact: [tim@bastelfreak.de](mailto:tim@bastelfreak.de) or bastelfreak on freenode
+
+* [Collection of related talks](https://github.com/bastelfreak/talks)
+
+]
     </textarea>
     <script src="remark-latest.min.js">
     </script>
