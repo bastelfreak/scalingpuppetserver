@@ -319,6 +319,14 @@ class: center, middle, inverse
 
 .footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
 
+???
+
+* I will now talk about the improvements that we did
+
+* They are ordered the way we did them, not the optimal way
+
+* people should probably start with metrics...
+
 ---
 
 .left-column[
@@ -365,6 +373,7 @@ puppet::server_environment_class_cache_enabled: true
 ```
 
 * cleaning the cache:
+
 ```sh
 curl -i --cert $(puppet config print hostcert) \
 --key $(puppet config print hostprivkey) \
@@ -379,7 +388,6 @@ https://$(puppet config print server):8140/puppet-admin-api/v1/environment-cache
 It can be purged globally or per env. Cache can be configured for each env
 
 ---
-
 
 .left-column[
 ## Improvements
@@ -400,27 +408,143 @@ It can be purged globally or per env. Cache can be configured for each env
 
 ```yaml
 ---
-# dont create development/production env
+# don't create development/production env
 puppet::server_environments: []
-# dont create /etc/puppetlabs/code/environments/common
+# don't create /etc/puppetlabs/code/environments/common
 puppet::server_common_modules_path: ''
 ```
 ]
 
 ---
 
+.left-column[
+## Improvements
+### Puppetserver
+]
+
+.right-column[
+
+* JVM has a configureable minimal and maximal amount of memory to allocate
+
+* Memory is shared across all jruby instances (and other threads)
+
+* Puppet Inc docs suggest that minimal=maximal memory
+
+  * that is based on Java 6 docs, so probably outdated
+
+* Required memory per instance depends entirely on the codebase (modules)
+
+* 2GB seem to work out fine for my setup
+
+```puppet
+# How do I do this with hiera?
+$cpu_count_twice = $facts['processors']['count'] * 2
+$cpu_count = $facts['processors']['count'] * 1
+class{'puppet':
+  server_jvm_min_heap_size => "${cpu_count}G",
+  server_jvm_max_heap_size => "${cpu_count_twice}G",
+}
+```
+]
+
+???
+
+higher minimal heap size => higher startupt time
+
+---
+
+.left-column[
+## Improvements
+### Puppetserver
+### Foreman
+]
+
+.right-column[
+
+* foreman supports caching out of the box
+
+* we use [saz/memcached](https://forge.puppet.com/saz/memcached) to provision [memcached](https://memcached.org/)
+
+```yaml
+# 50GB of cache
+memcached::max_memory: 51200
+foreman::plugin::memcache::hosts:
+  - 127.0.0.1
+```
+
+```puppet
+include memcached
+include foreman::plugin::memcache
+```
+]
+???
+
+* foreman still feels slow
+
+* memcached is a memory object caching system
+
+* helps caching $things for foreman
+
+* is required if you ever run a distributed foreman
+---
+
+.left-column[
+## Improvements
+### Puppetserver
+### Foreman
+]
+
+.right-column[
+
+* `passenger-status` says it only runs with a single process..
+
+* [theforeman/foreman](https://forge.puppet.com/theforeman/foreman) uses [puppetlabs/apache](https://forge.puppet.com/puppetlabs/apache) to configure [passenger](https://www.phusionpassenger.com/library/admin/apache/overall_status_report.html)
+
+```yaml
+---
+apache::mod::passenger::passenger_max_pool_size: %{facts.processors.count}
+apache::mod::passenger::passenger_min_instances: %{facts.processors.count}
+```
+]
+
+???
+
+after this we see database issues in the foreman logfile
+
+---
 
 
+.left-column[
+## Improvements
+### Puppetserver
+### Foreman
+]
 
+.right-column[
 
+* we use [theforeman/foreman](https://forge.puppet.com/theforeman/foreman) to manage foreman
 
+* Tuned puppetserver results in more requests to foreman
 
+```yaml
+---
+# default is 5
+foreman::db_pool: 20
+foreman::keepalive: true
+foreman::max_keepalive_requests: 1000
+foreman::keepalive_timeout: 180
+```
+]
 
+???
 
+* Puppetserver server isn't running at full load, but agents are slow
+* maybe the node.rb is slow as hell?
+* keepalive is active by default, but only for 5 seconds / 100 requests
+* keeps the connection to puppetserver open and reduces overhead (handshake/TLS)
+* We just killed our database with too many connections
 
-
-
-
+---
 
 
 
