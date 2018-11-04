@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scaling and monitoring your puppetserver for thousands of clients - Tim Meusel</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(//fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(//fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(//fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+         body {
+        font-family: 'Droid Serif';
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      .remark-slide-content h1 { font-size: 3em; }
+      .remark-slide-content h2 { font-size: 2em; }
+      .remark-slide-content h3 { font-size: 1.6em; }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+      }
+      li p { line-height: 1.25em; }
+      .red { color: #fa0000; }
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        -moz-border-radius: 5px;
+        -web-border-radius: 5px;
+        background: #e7e8e2;
+        border-radius: 5px;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code-line-highlighted     { background-color: #373832; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #272822;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+      /* Two-column layout */
+      .puppetlogo img {
+        width: 95%;
+      }
+      .logo img {
+        width: 100%;
+      }
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+      .left-column h2:last-of-type, .left-column h3:last-child {
+        color: #000;
+      }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+      .right-column .something img {
+        width: 100%;
+        height: 550px;
+      }
+      .right-column .something2 img {
+        width: 44%;
+      }
+      .right-column-center {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+        text-align: center;
+      }
+      .right-column img {
+        width: 100%;
+      }
+      @page {
+        size: 1024px 786px;
+        margin: 0;
+      }
+      @media print {
+        .remark-slide-scaler {
+          width: 100% !important;
+          height: 100% !important;
+          transform: scale(1) !important;
+          top: 0 !important;
+          left: 0 !important;
+          size: 1920px 1080px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle, inverse
+
+# Scaling and monitoring your puppetserver for thousands of clients
+## Includes all pitfalls!
+
+---
+
+## $ whoami
+
+* Tim 'bastelfreak' Meusel
+
+* DevOps Engineer at GoDaddy EMEA
+
+* Puppet Contributor since 2012
+
+* Merging stuff on Vox Pupuli since 2015
+
+* Vox Pupuli PMC member
+
+???
+
+---
+
+.left-column[
+# starting point
+## Puppetserver
+]
+
+.right-column[
+![image](server.svg)
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* Who of you runs puppetserver?
+* This is how it all starts, a single box
+
+---
+
+.left-column[
+# starting point
+## Puppetserver
+## PuppetDB
+]
+
+.right-column[
+![image](server.svg)
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* Who of you runs puppetserver?
+* This is how it all starts, a single box
+
+---
+
+.left-column[
+# starting point
+## Puppetserver
+## PuppetDB
+## Postgresql
+]
+
+.right-column[
+![image](server.svg)
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+# starting point
+## Puppetserver
+## PuppetDB
+## Postgresql
+## PuppetBoard
+]
+
+.right-column[
+![image](server.svg)
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+# starting point
+## Puppetserver
+## PuppetDB
+## Postgresql
+## PuppetBoard
+## Foreman
+]
+
+.right-column[
+![image](server.svg)
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+# starting point
+## Puppetserver
+## PuppetDB
+## Postgresql
+## PuppetBoard
+## Foreman
+## gnatsd
+]
+
+.right-column[
+![image](server.svg)
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* messaging daemon for choria -> mcollective replacement
+
+---
+
+
+class: center, middle, inverse
+
+## Coworker: Puppet agents are slow, can you please check the monitoring?
+
+---
+
+class: center, middle, inverse
+
+## Coworker: Puppet agents are slow, can you please check the monitoring?
+## Uhm, which monitoring?
+
+???
+
+---
+
+.logo[
+![image](camptocamp.png)
+]
+
+.footnote[&copy; [camptocamp](https://www.camptocamp.com/de/actualite/an-orchestrated-puppet-infrastucture-with-docker-and-rancher/)]
+---
+
+.logo[
+![image](architecture.svg)
+]
+
+.footnote[&copy; [camptocamp](https://www.camptocamp.com/de/actualite/an-orchestrated-puppet-infrastucture-with-docker-and-rancher/)]
+--
+.left-column[
+## Puppet DSL
+]
+
+.right-column[
+```puppet
+package{'htop':
+  ensure => 'present',
+}
+```
+]
+---
+
+.left-column[
+## Puppet
+]
+
+.right-column[
+```puppet
+package{'htop':
+  ensure => 'present',
+}
+```
+
+```puppet
+elasticsearch::instance { 'testinstance':
+  jvm_options   => $jvm_options,
+  config        => $config,
+  init_defaults => {
+    'ES_PATH_CONF' => '/etc/elasticsearch/testinstance',
+  },
+}
+```
+]
+
+---
+
+.puppetlogo[
+![image](puppetforge.png)
+]
+
+---
+
+.puppetlogo[
+![image](nginx.png)
+]
+
+---
+
+.puppetlogo[
+![image](nginx.png)
+![image](apache2.png)
+]
+
+---
+
+.puppetlogo[
+![image](puppetconf.jpg)
+]
+
+---
+
+.left-column[
+## Vox Pupuli
+### What?
+
+]
+.right-column[
+
+### How to write and pronounce
+
+* Vox Pupuli
+
+* VoxPupuli
+
+* Voxpupuli
+
+* voxpupuli
+
+* puppet-community -> Vox Pupuli
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* many people write it wrong
+* we agreed on Vox Pupuli
+* Nobody knows how to pronounce it?
+
+---
+
+## Vox Pupuli
+
+.left-column[
+###What?
+]
+
+.right-column[
+
+* Maintain many many modules
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* We maintain more modules than the company Puppet
+* This leads to some challenges, which I want to discuss today
+* 88 modules during puppetconf2017, 92 in January 2018
+
+---
+
+## Vox Pupuli
+
+.left-column[
+
+### What?
+]
+
+.right-column[
+
+* Maintain many many modules
+
+* Be helpful and polite to each other
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* 24/7 someone is in the IRC to help you
+* We've a code of conduct but never had to enforce it
+* Everybody is friendly, which isn't common these days
+
+---
+
+## Vox Pupuli
+.left-column[
+### What?
+]
+
+.right-column[
+
+* Maintain many many modules
+
+* Be helpful and polite to each other
+
+* Be open-minded to people and technology
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* People get easily access to our repos
+* we encourage users to contribute
+* We're always happy to play with new software (automation scripts, IRC bots...) or adopt new modules
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### What?
+]
+.right-column[
+
+* Maintain many many modules
+
+* Be helpful and polite to each other
+
+* Be open-minded to people and technology
+
+* Provide a home for orphaned Puppet modules
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* as a user, it's an awful experience to find a module for your usecase, and notice afterwards that it is dead
+* We want to avoid that as a collective of module developers
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### What?
+]
+.right-column[
+
+* Maintain many many modules
+
+* Be helpful and polite to each other
+
+* Be open-minded to people and technology
+
+* Provide a home for orphaned Puppet modules
+
+* Unite lonely module and tooling authors to a collective
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* Developing alone sucks
+* There is a hard pressure on a single person, if your module gets famous
+* Sometimes you want to go on vacation, switch jobs, lose interest in developing
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### What?
+]
+.right-column[
+
+* Maintain many many modules
+
+* Be helpful and polite to each other
+
+* Be open-minded to people and technology
+
+* Provide a home for orphaned Puppet modules
+
+* Unite lonely module and tooling authors to a collective
+
+* Ensure continued development for our code
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### What?
+### Who?
+]
+
+.right-column[
+
+* Currently 122 people with merge permissions
+
+  * We were 113 in February 2018
+
+  * We were 107 in October 2017
+
+  * We were 80 in November 2016
+
+* Just a few people work for Puppet Inc.
+
+* Most of the contributors participate in their free time
+
+* Normal administrators that have to deal with puppet at work
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* only 5 regular contributors work at Puppet Inc, we're independent from the company
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### What?
+### Who?
+]
+
+.right-column[
+
+## Science!
+
+![image](contributors.svg)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+---
+
+
+## Vox Pupuli
+
+.left-column[
+### What?
+### Who?
+]
+
+.right-column[
+
+
+* Many git newbies
+
+  * Rebasing a feature branch against upstream master is hard
+
+* Many newcomers to test frameworks
+
+  * Dealing with rspec/rubocop/beaker is hard as well
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* Many contributors are new to git and github
+* Many never wrote tests
+* we don't have to teach them writing good puppet code, but all the related tooling
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### What?
+### Who?
+]
+
+.right-column[
+
+
+* Many administrators of legacy infrastructures
+
+  * Puppet3, Ruby191, Ruby2.0
+
+  * November 2016: Puppet2.7, Ruby187
+
+  * Do we already call Puppet4 legacy? (yes pls)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+Was: Ruby hashrocket notation doesnt work on ruby187
+Now: There is a strange datatype in my code (puppet4/5 code executed with puppet3)
+Now: Data-in-modules doesn't work
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### What?
+### Who?
+### Why?
+
+]
+
+.right-column[
+
+* Maintaining a module on your own is hard
+
+  * Changing best practices, vacations, losing interest
+
+* Proper testing of a module requires a lot of stuff from the ruby ecosystem
+
+  * Ruby ecosystem and related tools are changing too fast for a single person
+
+  * Everything has to work on multiple Ruby/Puppet versions
+
+  * Rubocop
+
+  * Rubocop
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+
+???
+
+* Who tried to fix rubocop warnings in a module and couldn't fix all?
+* Shout out to hailee/HAIL9000 who fixed maaaaaaaany rubocop errors in the mongodb module for many days
+
+---
+
+## Vox Pupuli
+
+.left-column[
+
+## How?
+### modulesync
+
+]
+
+.right-column[
+
+* We are managing 105 puppet modules and (155 git repos)
+
+  * We had 92 modules in February 2018
+
+  * We had 75 modules in November 2016
+
+* modulesync was developed by Puppet Inc, moved to Vox Pupuli
+
+* It takes a config file + templates, throws it into every modules git repo
+
+* Works with GitHub Pull Requests
+
+* Everybody can start it
+
+* Every of our Collaborators can approve/merge it
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* amount of modules grows
+* Keeping generic files like Gemfile/Rakefile in sync is pain, if done by hand
+* modulesync saves us sooo much time
+
+---
+
+## Vox Pupuli
+
+.left-column[
+
+## How?
+### modulesync
+### travis
+
+]
+
+.right-column[
+
+![Right-aligned image](travis.png)
+
+* Free CI platform
+
+* Puppet Inc. sponsors us unlimited? concurrent travis slots
+
+* rpsec-puppet on common Puppet*Ruby versions
+
+* release modules to the forge
+
+* beaker acceptance tests
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* nobody knows how many travis slots we can use, but it works well!
+* Thanks to David Schmitt for organizing this
+
+---
+
+## Vox Pupuli
+
+.left-column[
+
+## How?
+### modulesync
+### travis
+### Release task
+
+]
+
+.right-column[
+
+* Gem called voxpupuli-release
+
+* provides rake task to bump + tag a module
+
+  * Also pushed to the forge
+
+* Upcoming: Also create a github release
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* everybody can start it, each collaborator can approve it
+* We encourage users to contribute by providing easy to use tools
+
+---
+
+## Vox Pupuli
+
+.left-column[
+
+## How?
+### modulesync
+### travis
+### Release task
+### Tooling
+]
+
+.right-column[
+
+* https://github.com/underscorgan/community_management
+
+  * Open Issues and PRs sorted in different ways
+
+* https://voxpupuli-open-prs.herokuapp.com/
+
+  * Also open PRs
+
+* https://github.com/voxpupuli/thevoxfox
+
+  * IRC bot, allows us to merge stuff + trigger modulesync (soon, maybe)
+
+* https://github.com/bastelfreak/contributorstats
+
+  * count contributions
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+---
+
+## Vox Pupuli
+
+.left-column[
+
+## How?
+### modulesync
+### travis
+### Release task
+### Tooling
+### Docs
+]
+
+.right-column[
+
+* Review Guidelines: https://voxpupuli.org/docs/#reviewing-a-module
+
+* puppet-strings generates html docs
+
+  * https://voxpupuli.org/puppet-selinux
+
+  * https://voxpupuli.org/puppet-autofs
+
+  * https://voxpupuli.org/puppet-mumble
+
+  * https://voxpupuli.org/puppet-cassandra (in the making)
+
+  * https://voxpupuli.org/puppet-rabbitmq (in the making)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* We now have a list of things that we check during a review! This allows us to get consistent code style and a better quality
+
+* We got a few modules with puppet-strings docs!
+* They are automagically published under our domain
+
+---
+
+## Vox Pupuli
+
+.left-column[
+
+### Governance?
+###PMC
+
+]
+
+.right-column[
+
+* We elected a second Project Management Committee in 2018!
+
+* PMC enforces CoC
+
+* Brings Vox Pupuli into the Software Freedom Conservancy
+
+* PMC guidelines are created by the community https://tinyurl.com/voxpupuli-governance-md
+
+* Current members:
+
+  * Tim ‘bastelfreak’ Meusel (reelected)
+  * David ‘dhollinger’ Hollinger
+  * Hunter ‘Hunner’ Haugen (works for Puppet Inc., reelected)
+  * Alex ‘afisher’ Fisher
+  * Eric ‘eputnam’ Putnam (works for Puppet Inc.)
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+---
+
+## Vox Pupuli
+
+.left-column[
+
+### Governance?
+### PMC
+### Collaborators
+
+]
+
+.right-column[
+
+* Review pull requests
+
+* Explain why we don't support ruby187 anymore
+
+* New: Explain why we don't support Puppet3 anymore
+
+* Help with git
+
+* Trigger the automated release process
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+
+]
+
+.right-column[
+
+![image](bugfix.png)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* people are often scared to contribute
+* They often think they can't write the needed code, but they can!
+* encourage them
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+
+]
+
+.right-column[
+
+![image](eol.png)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* TL;DR still people use outdated ruby/puppet versions from time to time :(
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+
+]
+
+.right-column[
+
+![image](travisrestart.png)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* travis cheets for 100: closing/reopen a PR will retrigger travis
+* A project admin can do this in the travis UI, outside-contributors can't
+* close/reopen can be triggered by the PR author
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+
+]
+
+.right-column[
+
+![image](spectests.png)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* we try to get at least a unit test for all new features
+* on a bugfix: Dope to include a test that fails without the patch, but works with it
+* Always say thanks! Be friendly to contributors. We're always happy for a new Issue/PR (We prefer PRs)
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+
+]
+
+.right-column[
+
+![image](yey.png)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* everybody is good at blaming others
+* we rarely tell people that they made something good
+* bastelfreak is happy about all new datatypes
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+
+]
+
+.right-column[
+
+![image](fail.png)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* people often don't notice that travis has a failed job
+* Do we need to change the visibility?
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+
+]
+
+.right-column[
+
+![image](email.png)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* for a clean history we want people to use a correct email address
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+
+]
+
+.right-column[
+
+![image](readme.png)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* Something that many people very often forget: Is the new feature documented in the README.md?
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+
+]
+.right-column[
+
+![image](migrate.png)
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* often people ask us to migrate a dead module into our namespace
+* we head out to the maintainer and ask for that
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+
+]
+
+.right-column[
+  .something2[
+    ![image](candy.jpg)
+  ]
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+some explanation: bastelfreak noticed in the Archlinux community that people are happy, if you send them sweets
+
+We tried this in the Puppet community as well. Puppet Inc. received 15pounds of sweets for all their encouragement for the community.
+
+You all keep contributing and bastelfreak will send you sweets as well!
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+### Broken Stuff
+]
+
+.right-column[
+
+
+* Vox Pupuli is the place to be if something is broken
+
+  * puppetlabs-stdlib
+
+  * puppetlabs-stdlib again
+
+  * puppetlabs-apt
+
+  * puppet-systemd (sorry)
+
+]
+
+???
+
+* story time: Everytime one popular module is broken, people will join the Vox Pupuli IRC channel
+* This happend twice for stdlib (we didn't break it, we just noticed it)
+* bastelfreak once added a breaking change to the systemd module which killed the openstack CI pipelines (happened twice)
+
+---
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+### Broken Stuff
+### Quotes
+
+]
+
+.right-column[
+
+* 'Release early - release often' - [Igor Galic](https://twitter.com/hirojin)
+
+]
+
+???
+
+* people are scared about making released because it could break things
+* Maintainers are scared to break the environments from their users
+* release as often as possible. Less changes per release -> less broken releases
+
+---
+
+background-image: url(blue-skies.jpg)
+background-size: cover
+
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+### Broken Stuff
+### Quotes
+
+]
+
+.right-column[
+
+* 'Release early - release often' - [Igor Galic](https://twitter.com/hirojin)
+
+* 'Version numbers are cheap - use them' - [Igor Galic](https://twitter.com/hirojin)
+
+]
+
+???
+
+* people are often scared to merge breaking changes. Merging them is totally okay if you do proper versioning
+* we don't delete broken releases and try to fix it, we just do a new release
+
+---
+
+background-image: url(blue-skies.jpg)
+background-size: cover
+
+
+## Vox Pupuli
+
+.left-column[
+### Daily Business
+### Broken Stuff
+### Quotes
+
+]
+
+.right-column[
+
+* 'Release early - release often' - [Igor Galic](https://twitter.com/hirojin)
+
+* 'Version numbers are cheap - use them' - [Igor Galic](https://twitter.com/hirojin)
+
+* 'DevOps is all about empathy' - [Rob Nelson](https://twitter.com/rnelson0)
+
+]
+
+???
+
+* working closely together, listen to users, always be constructive, don't blame others for mistakes, we all break stuff from time to time
+* the 'listen' gem issue
+
+---
+
+background-image: url(blue-skies.jpg)
+background-size: cover
+
+## Vox Pupuli
+
+.left-column[
+
+## Summary
+
+]
+
+.right-column[
+
+* We have great tooling and automation
+
+* We have great people
+
+* You need help with Puppet?
+
+  * Let us know, we help out!
+
+* You have an orphaned module or know one?
+
+  * Ping us, migrate it to us
+
+* You have domain specific knowledge?
+
+  * Ruby, Python, Rspec, Beaker, $software we automate
+
+]
+
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+---
+
+background-image: url(blue-skies.jpg)
+background-size: cover
+
+## Vox Pupuli
+
+.left-column[
+
+## Summary
+
+]
+
+.right-column[
+
+* You want to help out?
+
+  * We are always looking for new Collaborators and Maintainer
+
+Contact:
+
+* IRC #voxpupuli on freenode
+
+* Slack: #voxpupuli on puppetcommunity.slack.com
+
+* voxpupuli@groups.io
+
+* pmc@voxpupuli.org
+
+* tim@bastelfreak.de
+
+* More talks at [https://github.com/bastelfreak/talks](https://github.com/bastelfreak/talks#collection-of-talks-proposals-and-related-stuff)
+
+### Thanks for your attention!
+
+]
+
+    </textarea>
+    <script src="remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        // Set the slideshow display ratio
+        // Default: '4:3'
+        // Alternatives: '16:9', ...
+        ratio: '4:3'}
+      );
+    </script>
+  </body>
+</html>
