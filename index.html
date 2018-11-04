@@ -621,18 +621,53 @@ puppetdb::server::automatic_dlo_cleanup: true
 
 ---
 
+.left-column[
+## Scaling
+]
+
+.right-column[
+.logo[
+![image](architecture4.svg)
+]
+]
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+Depening on the amount of resources / agent runinterval, a single puppetserver just doesn't have enough resources
+scale out instead of scale up
+Master of Masters. The agent on all other masters request a catalog from the MoM
+We don't want a loadbalancer as that would be a single point of failure
+
+---
+
+.left-column[
+## Scaling
+]
+
+.right-column[
+
+[Puppetserver docs](https://github.com/puppetlabs/trapperkeeper-webserver-jetty9/blob/master/doc/jetty-config.md):
+
+* `selector-threads`: This sets the number of selectors that the webserver will dedicate to processing events on connected sockets for unencrypted HTTPS traffic. No known upper limit
+
+* `ssl-selector-threads`: same as `selector-threads`, just for HTTPS. "Defaults to the number of virtual cores on the host divided by 2, with a minimum of 1 and maximum of 4"
+]
+
+---
 
 
+.left-column[
+## Scaling
+]
 
-
-
-
-
-
-
-
-
-
+.right-column[
+.logo[
+![image](wat.jpg)
+]
+]
+.footnote[&copy; [knowyourmeme.com](https://knowyourmeme.com/memes/wat)]
+---
 
 
 
