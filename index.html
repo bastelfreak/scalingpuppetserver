@@ -729,6 +729,37 @@ We don't want a loadbalancer as that would be a single point of failure
 ---
 
 .left-column[
+## Metrics
+]
+
+.right-column[
+
+* Puppetserver can expose graphite
+
+  * A graphite stack looks very complicated
+
+* Puppetserver has a metrics API and exposes [JMX data](https://www.oracle.com/technetwork/articles/java/javamanagement-140525.html) via [Jolokia](https://jolokia.org/)
+
+* We can load a prometheus exporter into the JVM to write metrics into a prometheus instance
+
+```yaml
+puppet::server_jvm_extra_args:
+  - '-javaagent:prometheus.jar=127.0.0.1:9020:config.yaml'
+```
+]
+
+???
+
+JMX data and JVM debugging is a complex topic
+in theory JMX is writeable, you can trigger heapdumps, didn't work
+the prometheus javaagent is developed and support by the prometheus team
+puppetdb/puppetserver expose custom + std JVM metrics
+works for puppetdb as well
+foreman metrics are availble since a few weeks, didn't test
+dont kill your puppetserver by pulling data too often
+---
+
+.left-column[
 ## Summary
 ]
 
