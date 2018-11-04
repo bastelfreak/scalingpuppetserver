@@ -583,9 +583,43 @@ postgresql::server::config_entry{'max_connections':
 * Upstream postgres supports Debian and RHEL/IBM based operatingsystems
 * postgres10 supports parallel/multithreaded queries
 * puppetdb doesn't support postgres10 yet, but it works. support comes with the next minor release
+
 ---
 
+.left-column[
+## Improvements
+### Puppetserver
+### Foreman
+### PostgreSQL
+### PuppetDB
+]
 
+.right-column[
+
+* Simply JVM service that scales good with the amount of threads
+
+* It's a RESTful service that stores data in PostgreSQL
+
+```yaml
+puppetdb::server::java_args:
+  '-Xmx': '8192m'
+  '-Xms': '2048m'
+puppetdb::server::node_ttl: '14d',
+puppetdb::server::node_purge_ttl: '14d',
+puppetdb::server::report_ttl: '999d'
+# default is 50
+puppetdb::server::max_threads: 100
+# default is processorcount / 2
+puppetdb::server::command_threads: %{facts.processors.count}
+# default is 4, have your database in mind
+puppetdb::server::concurrent_writes: 8
+puppetdb::server::automatic_dlo_cleanup: true
+```
+]
+
+???
+
+---
 
 
 
