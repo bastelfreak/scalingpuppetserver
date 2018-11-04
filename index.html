@@ -314,20 +314,31 @@ class: center, middle, inverse
 ---
 
 .logo[
-![image](architecture.svg)
+![image](architecture3.svg)
 ]
 
-.footnote[&copy; [camptocamp](https://www.camptocamp.com/de/actualite/an-orchestrated-puppet-infrastucture-with-docker-and-rancher/)]
---
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+---
+
 .left-column[
-## Puppet DSL
+## Improvements
+### Puppetserver
 ]
 
 .right-column[
-```puppet
-package{'htop':
-  ensure => 'present',
-}
+* uses jruby within a JVM
+
+* one jruby instance compiles one catalog at a time
+
+* More instances => more catalogs per minute
+
+* use [theforeman/puppet](https://forge.puppet.com/theforeman/puppet) to configure puppeterver
+
+```yaml
+---
+puppet::server_max_active_instances: \
+%{facts.processors.count}
 ```
 ]
 ---
