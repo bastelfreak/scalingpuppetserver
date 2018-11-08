@@ -4,10 +4,13 @@
     <title>Scaling and monitoring your puppetserver for thousands of clients - Tim Meusel</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <style type="text/css">
-      @import url(//fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
-      @import url(//fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
-      @import url(//fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
-         body {
+      @font-face {
+        font-family: 'Yanone Kaffeesatz';
+        font-style: normal;
+        font-weight: 400;
+        src: local('Yanone Kaffeesatz Regular'), local('YanoneKaffeesatz-Regular'), url(YDAoLskQQ5MOAgvHUQCcLbvy90DtE_Pg_qiF9bHvTzw.ttf) format('truetype');
+      }
+      body {
         font-family: 'Droid Serif';
       }
       h1, h2, h3 {
@@ -600,6 +603,7 @@ postgresql::server::config_entry{'max_connections':
 * Upstream postgres supports Debian and RHEL/IBM based operatingsystems
 * postgres10 supports parallel/multithreaded queries
 * puppetdb doesn't support postgres10 yet, but it works. support comes with the next minor release
+* we had no issues with garbadge collection
 
 ---
 
@@ -725,6 +729,7 @@ We don't want a loadbalancer as that would be a single point of failure
 
 * consul provides DNS loadbalancing
 * We can provide a health script to check if puppetserver still works, otherwise consul disables the node
+* repo has unit and acceptance test
 
 .footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
 
